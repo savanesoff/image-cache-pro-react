@@ -3,15 +3,15 @@
   "private": false,
   "version": "0.0.0",
   "type": "module",
-  "description": "React bindings for image-cache-pro — providers and hooks to stage image decode/GPU work off the interaction critical path on resource-constrained devices (STB/Cobalt, low-power TVs).",
-  "main": "./dist/cjs/index.js",
+  "description": "React bindings for image-cache-pro — providers, hooks and a device-friendly image component that stage image decode/GPU work off the interaction critical path (STB/Cobalt, smart TVs, low-power devices).",
+  "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "require": "./dist/cjs/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -29,9 +29,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/savanesoff/image-cache-pro-react"
+    "url": "git+https://github.com/savanesoff/image-cache-pro-react.git"
   },
-  "packageManager": "pnpm@9.1.4",
+  "packageManager": "pnpm@11.15.1",
   "keywords": [
     "image cache",
     "react",
@@ -42,66 +42,71 @@
     "GPU management",
     "web performance",
     "cobalt",
+    "smart tv",
+    "stb",
     "typescript"
   ],
   "publishConfig": {
     "access": "public"
   },
   "engines": {
-    "node": ">=20.11.0",
-    "pnpm": ">=9.1.4"
+    "node": ">=20.19.0",
+    "pnpm": ">=10"
   },
   "bugs": {
     "url": "https://github.com/savanesoff/image-cache-pro-react/issues"
   },
   "homepage": "https://github.com/savanesoff/image-cache-pro-react#readme",
   "scripts": {
-    "dev": "vite",
-    "lint": "eslint .",
+    "dev": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build",
+    "lint": "prettier --check . && eslint .",
+    "lint-fix": "prettier --write . && eslint . --fix",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "test": "vitest --run",
     "test:watch": "vitest",
+    "coverage": "vitest --run --coverage",
     "clean": "rm -rf ./dist",
-    "build:types": "tspc --project tsconfig.package.json",
-    "build": "pnpm run clean && vite build && pnpm run build:types",
-    "prepack": "pnpm run build",
+    "build": "pnpm run clean && vite build",
     "release": "pnpm run build && pnpm run test && pnpm changeset publish"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "image-cache-pro": "^0.6.0",
-    "tslib": "^2.8.1"
+    "image-cache-pro": "^0.7.0"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.11",
-    "@eslint/js": "^9.17.0",
+    "@changesets/cli": "^2.31.1",
+    "@eslint/js": "^10.0.1",
+    "@storybook/react-vite": "^10.5.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
-    "@types/node": "^22",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^9.17.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-react": "^7.37.3",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "jsdom": "^25.0.1",
-    "prettier": "^3.4.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "ts-patch": "^3.3.0",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.19.0",
-    "typescript-transform-paths": "^3.5.5",
-    "vite": "^6.0.7",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.0"
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "@vitest/eslint-plugin": "^1.6.23",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.7.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.9.6",
+    "publint": "^0.3.14",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "storybook": "^10.5.3",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "vite": "^8.1.5",
+    "vite-plugin-dts": "^5.0.3",
+    "vitest": "^4.1.10"
   }
 }

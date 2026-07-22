@@ -1,41 +1,41 @@
-name: Test
-
+name: Unit Tests
+run-name: ${{ github.actor }} is running unit tests... 🚀
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
-
-concurrency:
-  group: test-${{ github.ref }}
-  cancel-in-progress: true
+    types: [opened, synchronize, reopened, edited]
 
 jobs:
-  test:
+  cache-and-install:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      # Reads the version from package.json "packageManager"
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9.1.4
+        name: Install pnpm
 
-      - uses: actions/setup-node@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: pnpm
+          node-version-file: .nvmrc
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
+        run: pnpm lint
 
-      - name: Type-check
+      - name: Type check
         run: pnpm run type-check
 
-      - name: Test
-        run: pnpm run test
+      - name: Run tests
+        run: pnpm test
 
-      - name: Build
-        run: pnpm run build
+      - name: Build package (+ publish hygiene)
+        run: pnpm run build && pnpm exec publint
+
+      - name: Build storybook
+        run: pnpm run build:storybook

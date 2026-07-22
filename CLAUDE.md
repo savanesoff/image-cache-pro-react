@@ -6,9 +6,17 @@ React bindings for [`image-cache-pro`](https://github.com/savanesoff/image-cache
 
 This is a **standalone, publishable npm package**. It is consumed by `@oregannetworks/react-kit` (the Onyx STB component lib) and wired into its `Icon` component. Keeping it as its own public package — rather than folding it into react-kit — lets non-Onyx consumers use it and keeps the STB-perf concern isolated.
 
-## Current status: scaffold
+## Current status: implemented
 
-The **toolchain is fully wired and green** (build, types, tests, lint, CI, changesets publish). The **binding surface is not implemented yet** — `src/placeholder.ts` is a smoke-test stub that exercises the React+build+test pipeline and will be deleted when real bindings land. Designing the bindings is a **dedicated future session**; do not start it here unless asked.
+The binding surface is implemented over the published `image-cache-pro@0.7`:
+`<ImageCacheProvider>` (+`useController`), `<BucketProvider>` (+`useBucket`,
+`useBucketState`), `useImage`, `<CachedImage>`. Everything is memo'd, refs
+follow the effect-based "latest ref" pattern (react-hooks v7 / React
+Compiler clean), event-driven state is frame-coalesced
+(`src/internal/useCoalescedSnapshot.ts`), lifecycles are SSR + StrictMode
+safe, and teardown is deterministic (tests assert zero leaked bytes).
+The README is the public API doc; Storybook (`pnpm storybook`) is the demo
+and deploys to GH Pages from main.
 
 ## The roadmap (why this exists)
 
@@ -30,9 +38,10 @@ The **toolchain is fully wired and green** (build, types, tests, lint, CI, chang
 ## Tooling
 
 - **pnpm** (see `packageManager`), **Node ≥ 20**.
-- **Vite** lib build → dual `dist/esm` (ESM) + `dist/cjs` (CJS); **`tspc`** (ts-patch + `typescript-transform-paths`) emits `dist/types/*.d.ts` with `@/*` paths rewritten.
-- **Vitest** (jsdom + Testing Library, globals on; `vitest.setup.ts` registers jest-dom + auto-cleanup).
-- **ESLint 9 flat config** via `typescript-eslint` + react/react-hooks/import/prettier.
+- **Vite 8** lib build → `dist/esm` + `dist/cjs/*.cjs` + `dist/types` via `vite-plugin-dts`; `chrome88` target; react + image-cache-pro external (never bundled).
+- **Vitest 4** (jsdom + Testing Library; the suite drives the REAL engine — mocked XHR + manual frames via `src/testing/harness.tsx`).
+- **ESLint 10 flat config**, type-checked, + react-hooks v7 (eslint-plugin-react's own rules crash on ESLint 10 — deliberately not enabled), import-x, prettier-separate.
+- **Storybook 10** (react-vite) — the demo; `Demo/Rails` is the STB workload.
 - **changesets** drive releases through CI (`.github/workflows/publish.yaml`). Add a changeset per change; **publishing/versioning is Sam's job.**
 
 ## Commands

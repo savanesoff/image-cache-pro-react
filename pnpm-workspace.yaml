@@ -1,0 +1,6 @@
+allowBuilds:
+  unrs-resolver: true
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@vitejs/plugin-react@6.0.4'
+  - image-cache-pro@0.7.0
