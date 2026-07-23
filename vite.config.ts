@@ -45,7 +45,12 @@ export default defineConfig({
       outDirs: ['dist/types'],
       entryRoot: 'src',
       include: ['src'],
-      exclude: ['**/*.spec.ts', '**/*.spec.tsx', '**/*.stories.tsx'],
+      exclude: [
+        '**/*.spec.ts',
+        '**/*.spec.tsx',
+        '**/*.stories.tsx',
+        'src/testing/**',
+      ],
     }),
   ],
 })
