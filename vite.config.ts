@@ -50,6 +50,9 @@ export default defineConfig({
         '**/*.spec.tsx',
         '**/*.stories.tsx',
         'src/testing/**',
+        // internal helpers are bundled into the JS but are not public API and
+        // are not referenced by any public type — keep their .d.ts out of dist
+        'src/internal/**',
       ],
     }),
   ],
