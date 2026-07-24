@@ -4,7 +4,19 @@ coverage
 *.log
 .DS_Store
 .idea
+# Editor directories — shared editor config IS committed
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
 *.tsbuildinfo
 .eslintcache
+
+# build artifacts
+storybook-static
+
+# local machine config
+.npmrc
+.env
+.env.*
+.claude/settings.local.json

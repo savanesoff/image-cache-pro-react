@@ -1,28 +1,28 @@
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
-
-const dirname = path.dirname(fileURLToPath(import.meta.url))
+import dts from 'vite-plugin-dts'
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  resolve: {
+    tsconfigPaths: true,
+  },
   build: {
     lib: {
-      entry: path.resolve(dirname, 'src/index.ts'),
-      name: 'imageCacheProReact',
+      entry: path.resolve(import.meta.dirname, 'src/index.ts'),
+      name: 'image-cache-react',
     },
+    // Cobalt is a Chrome-88-class browser — the published bundle must not
+    // assume newer syntax.
+    target: 'chrome88',
     sourcemap: true,
     rollupOptions: {
-      // Never bundle React, the core lib, or the runtime helpers — the
-      // consumer provides them (React as a peer, image-cache-pro as a dep).
+      // never bundle react or the core engine — peers/deps of the consumer
       external: [
         'react',
         'react-dom',
         'react/jsx-runtime',
+        'react/jsx-dev-runtime',
         'image-cache-pro',
-        'tslib',
       ],
       output: [
         {
@@ -31,17 +31,29 @@ export default defineConfig({
           dir: 'dist/esm',
         },
         {
+          // .cjs: the package is type:module — plain .js here would be
+          // (mis)interpreted as ESM by Node and bundlers (publint)
           format: 'cjs',
-          entryFileNames: '[name].js',
+          entryFileNames: '[name].cjs',
           dir: 'dist/cjs',
         },
       ],
     },
   },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./vitest.setup.ts'],
-    css: false,
-  },
+  plugins: [
+    dts({
+      outDirs: ['dist/types'],
+      entryRoot: 'src',
+      include: ['src'],
+      exclude: [
+        '**/*.spec.ts',
+        '**/*.spec.tsx',
+        '**/*.stories.tsx',
+        'src/testing/**',
+        // internal helpers are bundled into the JS but are not public API and
+        // are not referenced by any public type — keep their .d.ts out of dist
+        'src/internal/**',
+      ],
+    }),
+  ],
 })

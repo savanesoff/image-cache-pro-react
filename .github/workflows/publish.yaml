@@ -1,50 +1,65 @@
 name: Publish
 
+# Direct-publish flow (mirrors image-cache-pro): merging to main IS the
+# release. CI consumes pending changesets, commits the bump back with
+# [skip ci], then builds, tests and publishes to npm.
+
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
-concurrency:
-  group: publish-${{ github.ref }}
-  cancel-in-progress: false
-
-permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
+    name: Version and publish to npm
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9.1.4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: pnpm
-          registry-url: https://registry.npmjs.org
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm run build
-
-      - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
-        with:
-          publish: pnpm changeset publish
-          version: pnpm changeset version
-          commit: 'chore: release'
-          title: 'chore: release'
+      - name: Verify npm auth (fail fast on dead token)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if ! npm whoami; then
+            echo "::error title=npm auth failed::NPM_TOKEN is missing/expired — mint a granular automation token with read/write on image-cache-pro-react and update the repo secret."
+            exit 1
+          fi
+
+      - name: Version packages (consume changesets)
+        run: pnpm exec changeset version
+
+      - name: Commit version bump back to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git commit -m "chore: version packages [skip ci]"; then
+            git push origin main
+          else
+            echo "No pending changesets — nothing to version."
+          fi
+
+      - name: Build, test and publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
+
+      - name: Push release tags
+        run: git push --tags origin main

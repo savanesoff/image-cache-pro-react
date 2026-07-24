@@ -3,26 +3,31 @@
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "skipLibCheck": true,
-    "importHelpers": true,
-    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"],
-    "baseUrl": "./",
+    "types": ["vite/client", "vitest/globals"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.ts", "vitest.setup.ts"],
+  "include": [
+    "src",
+    ".storybook",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    "eslint.config.js"
+  ],
   "exclude": ["node_modules", "dist"]
 }
