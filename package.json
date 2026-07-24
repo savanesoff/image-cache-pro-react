@@ -1,7 +1,7 @@
 {
   "name": "image-cache-pro-react",
   "private": false,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "React bindings for image-cache-pro — providers, hooks and a device-friendly image component that stage image decode/GPU work off the interaction critical path (STB/Cobalt, smart TVs, low-power devices).",
   "main": "./dist/cjs/index.cjs",
