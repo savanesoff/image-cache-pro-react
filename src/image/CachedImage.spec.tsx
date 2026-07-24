@@ -220,6 +220,74 @@ describe('CachedImage', () => {
     expect(el().dataset.state).toBe('rendered')
   })
 
+  it('applies rotated load options (headers) to the next request', () => {
+    const { rerender } = render(
+      <TestCache>
+        <CachedImage
+          url={url(0)}
+          width={CARD.width}
+          height={CARD.height}
+          headers={{ 'Content-Type': 'image/jpeg' }}
+          data-testid="img"
+        />
+      </TestCache>,
+    )
+
+    act(() => {
+      settle(controllerRef.current)
+    })
+
+    // rotate headers AND change the url — the new request must carry the
+    // latest options (not the first-render snapshot)
+    act(() => {
+      rerender(
+        <TestCache>
+          <CachedImage
+            url={url(1)}
+            width={CARD.width}
+            height={CARD.height}
+            headers={{ 'Content-Type': 'image/png' }}
+            data-testid="img"
+          />
+        </TestCache>,
+      )
+    })
+
+    const controller = controllerRef.current as Controller
+    const image = controller.cache.get(url(1))
+    expect(image?.headers).toEqual({ 'Content-Type': 'image/png' })
+  })
+
+  it('recovers cleanly when its bucket provider remounts around it', () => {
+    const tree = (bucketKey: number) => (
+      <TestCache key={bucketKey}>
+        <CachedImage
+          url={url(0)}
+          width={CARD.width}
+          height={CARD.height}
+          data-testid="img"
+        />
+      </TestCache>
+    )
+    const { rerender } = render(tree(1))
+
+    act(() => {
+      settle(controllerRef.current)
+    })
+    expect(el().dataset.state).toBe('rendered')
+
+    // remount the providers (new engine + bucket) — never stale-rendered
+    act(() => {
+      rerender(tree(2))
+    })
+    expect(el().dataset.state).not.toBe('rendered')
+
+    act(() => {
+      settle(controllerRef.current)
+    })
+    expect(el().dataset.state).toBe('rendered')
+  })
+
   it('renders overlay children above the image', () => {
     renderImage({ children: <span>badge</span> })
     expect(screen.getByText('badge')).toBeInTheDocument()

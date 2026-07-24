@@ -97,6 +97,11 @@ export function useImage({
 
   useEffect(() => {
     liveRef.current = { priority, visible, trackProgress }
+    // load options apply to the NEXT request creation (url/size change or
+    // remount): an in-flight request cannot change its headers, and the
+    // core shares one image per URL — but rotated auth headers must not be
+    // silently pinned to their first value
+    optionsRef.current = { headers, mimeType }
   })
 
   useEffect(() => {
@@ -210,5 +215,8 @@ export function useImage({
     }
   }, [visible])
 
-  return state
+  // While the bucket provider is (re)mounting around us there is nothing
+  // valid to show — the request (if any) was cleared with the old bucket.
+  // Derived at render (not setState-in-effect) so state can never go stale.
+  return bucket ? state : IDLE
 }
